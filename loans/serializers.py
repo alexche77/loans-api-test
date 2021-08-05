@@ -35,22 +35,14 @@ class UserSerializer(serializers.ModelSerializer):
         related_fields = ['balance']
 
     def get_owned(self, user):
-        try:
-            qs = Transaction.objects.filter(lender=user).order_by('recipient')\
+        return Transaction.objects.filter(lender=user).order_by('recipient')\
                 .annotate(
                     total=Sum('quantity'),
                     user=F('recipient__username')
                 )\
                 .values('user', 'total')
-            return qs
-        except Transaction.DoesNotExist:
-            return []
 
     def get_owns(self, user):
-        try:
-            qs = Transaction.objects.filter(recipient=user).order_by('lender')\
+        return Transaction.objects.filter(recipient=user).order_by('lender')\
                 .annotate(total=Sum('quantity'), user=F('lender__username'))\
                 .values('user', 'total')
-            return qs
-        except Transaction.DoesNotExist:
-            return []
